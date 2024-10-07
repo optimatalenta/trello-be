@@ -1,0 +1,35 @@
+{
+  "name": "trello-be",
+  "version": "1.0.0",
+  "description": "The backend of trello clone apps",
+  "main": "app.mjs",
+  "scripts": {
+    "dev": "nodemon ./src/app.mjs",
+    "start": "pm2 start ./src/app.mjs --name trello-be",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keyword": [
+    "trello",
+    "backend",
+    "clone"
+  ],
+  "author": "baiqyuniar",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "prisma": "^5.19.1"
+  }
+}

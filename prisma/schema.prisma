@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model activities {
+  id         Int       @id @default(autoincrement())
+  userId     Int?
+  boardId    Int?
+  name       String?   @db.VarChar(255)
+  action     String?   @db.VarChar(255)
+  date       DateTime? @default(now()) @db.DateTime(0)
+  edited     Boolean?  @default(false)
+  cardTitle  String?   @default("") @db.VarChar(255)
+  actionType String?   @default("action") @db.VarChar(255)
+  color      String?   @db.VarChar(255)
+  users      users?    @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "activities_ibfk_1")
+  boards     boards?   @relation(fields: [boardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "activities_ibfk_2")
+
+  @@index([boardId], map: "boardId")
+  @@index([userId], map: "userId")
+}
+
+model attachments {
+  id     Int       @id @default(autoincrement())
+  link   String?   @db.VarChar(255)
+  name   String?   @db.VarChar(255)
+  date   DateTime? @default(now()) @db.DateTime(0)
+  cardId Int?
+  cards  cards?    @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "attachments_ibfk_1")
+
+  @@index([cardId], map: "cardId")
+}
+
+model board_activities {
+  id        Int       @id @default(autoincrement())
+  board_id  Int?
+  user_id   Int?
+  action    String    @db.Text
+  name      String    @db.VarChar(255)
+  color     String?   @db.VarChar(50)
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  boards    boards?   @relation(fields: [board_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "board_activities_ibfk_1")
+  users     users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "board_activities_ibfk_2")
+
+  @@index([board_id], map: "board_id")
+  @@index([user_id], map: "user_id")
+}
+
+model board_members {
+  id       Int                @id @default(autoincrement())
+  board_id Int?
+  user_id  Int?
+  role     board_members_role
+  boards   boards?            @relation(fields: [board_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "board_members_ibfk_1")
+  users    users?             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "board_members_ibfk_2")
+
+  @@index([board_id], map: "board_id")
+  @@index([user_id], map: "user_id")
+}
+
+model boards {
+  id                           Int                @id @default(autoincrement())
+  title                        String             @db.VarChar(255)
+  backgroundImageLink          String?            @db.VarChar(255)
+  isImage                      Boolean?           @default(false)
+  description                  String?            @db.Text
+  userId                       Int?
+  createdAt                    DateTime?          @default(now()) @db.DateTime(0)
+  updatedAt                    DateTime?          @default(now()) @db.DateTime(0)
+  activities                   activities[]
+  board_activities             board_activities[]
+  board_members                board_members[]
+  users_boards_userIdTousers   users?             @relation("boards_userIdTousers", fields: [userId], references: [id], onUpdate: Restrict, map: "boards_ibfk_1")
+  lists                        lists[]
+  members                      members[]
+  users_users_board_idToboards users[]            @relation("users_board_idToboards")
+
+  @@index([userId], map: "userId")
+}
+
+model card_activities {
+  id        Int       @id @default(autoincrement())
+  userName  String?   @db.VarChar(255)
+  text      String?   @db.Text
+  date      DateTime? @default(now()) @db.DateTime(0)
+  isComment Boolean?  @default(false)
+  color     String?   @db.VarChar(255)
+  cardId    Int?
+  cards     cards?    @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "card_activities_ibfk_1")
+
+  @@index([cardId], map: "cardId")
+}
+
+model card_members {
+  id     Int     @id @default(autoincrement())
+  userId Int?
+  name   String? @db.VarChar(255)
+  color  String? @db.VarChar(255)
+  cardId Int?
+  users  users?  @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "card_members_ibfk_1")
+  cards  cards?  @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "card_members_ibfk_2")
+
+  @@index([cardId], map: "cardId")
+  @@index([userId], map: "userId")
+}
+
+model cards {
+  id              Int               @id @default(autoincrement())
+  title           String            @db.VarChar(255)
+  listId          Int?
+  createdAt       DateTime?         @default(now()) @db.DateTime(0)
+  updatedAt       DateTime?         @default(now()) @db.DateTime(0)
+  description     String?           @default("") @db.Text
+  dateStartDate   DateTime?         @db.DateTime(0)
+  dateDueDate     DateTime?         @db.DateTime(0)
+  dateDueTime     String?           @db.VarChar(255)
+  dateReminder    Boolean?
+  dateCompleted   Boolean?          @default(false)
+  coverColor      String?           @db.VarChar(255)
+  coverIsSizeOne  Boolean?
+  attachments     attachments[]
+  card_activities card_activities[]
+  card_members    card_members[]
+  lists           lists?            @relation(fields: [listId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "cards_ibfk_1")
+  checklists      checklists[]
+  labels          labels[]
+  watchers        watchers[]
+
+  @@index([listId], map: "listId")
+}
+
+model checklist_items {
+  id          Int         @id @default(autoincrement())
+  text        String?     @db.VarChar(255)
+  completed   Boolean?    @default(false)
+  checklistId Int?
+  checklists  checklists? @relation(fields: [checklistId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "checklist_items_ibfk_1")
+
+  @@index([checklistId], map: "checklistId")
+}
+
+model checklists {
+  id              Int               @id @default(autoincrement())
+  title           String?           @db.VarChar(255)
+  cardId          Int?
+  checklist_items checklist_items[]
+  cards           cards?            @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "checklists_ibfk_1")
+
+  @@index([cardId], map: "cardId")
+}
+
+model labels {
+  id        Int      @id @default(autoincrement())
+  text      String?  @db.VarChar(255)
+  color     String?  @db.VarChar(255)
+  backColor String?  @db.VarChar(255)
+  selected  Boolean?
+  cardId    Int?
+  cards     cards?   @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "labels_ibfk_1")
+
+  @@index([cardId], map: "cardId")
+}
+
+model lists {
+  id        Int       @id @default(autoincrement())
+  title     String    @db.VarChar(255)
+  boardId   Int?
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  cards     cards[]
+  boards    boards?   @relation(fields: [boardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "lists_ibfk_1")
+
+  @@index([boardId], map: "boardId")
+}
+
+model members {
+  id      Int     @id @default(autoincrement())
+  userId  Int?
+  boardId Int?
+  name    String? @db.VarChar(255)
+  surname String? @db.VarChar(255)
+  email   String? @db.VarChar(255)
+  role    String? @default("member") @db.VarChar(255)
+  color   String? @db.VarChar(255)
+  users   users?  @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "members_ibfk_1")
+  boards  boards? @relation(fields: [boardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "members_ibfk_2")
+
+  @@index([boardId], map: "boardId")
+  @@index([userId], map: "userId")
+}
+
+model users {
+  id                            Int                @id @default(autoincrement())
+  name                          String             @db.VarChar(255)
+  surname                       String             @db.VarChar(255)
+  email                         String             @unique(map: "email") @db.VarChar(255)
+  password                      String             @db.VarChar(255)
+  avatar                        String?            @db.VarChar(255)
+  color                         String?            @db.VarChar(50)
+  board_id                      Int?
+  createdAt                     DateTime?          @default(now()) @db.DateTime(0)
+  updatedAt                     DateTime?          @default(now()) @db.DateTime(0)
+  activities                    activities[]
+  board_activities              board_activities[]
+  board_members                 board_members[]
+  boards_boards_userIdTousers   boards[]           @relation("boards_userIdTousers")
+  card_members                  card_members[]
+  members                       members[]
+  boards_users_board_idToboards boards?            @relation("users_board_idToboards", fields: [board_id], references: [id], onUpdate: Restrict, map: "users_ibfk_1")
+  watchers                      watchers[]
+
+  @@index([board_id], map: "board_id")
+}
+
+model watchers {
+  id     Int     @id @default(autoincrement())
+  userId Int?
+  name   String? @db.VarChar(255)
+  cardId Int?
+  users  users?  @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "watchers_ibfk_1")
+  cards  cards?  @relation(fields: [cardId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "watchers_ibfk_2")
+
+  @@index([cardId], map: "cardId")
+  @@index([userId], map: "userId")
+}
+
+enum board_members_role {
+  owner
+  member
+}
