@@ -14,8 +14,20 @@
     docker compose exec trello-api npx prisma migrate dev
     ```
 
+    - **Run DB Push**
+
+    ```sh
+    docker compose exec trello-api npx prisma db push
+    ```
+
 3. **View Logs**
 
     ```sh
     docker compose logs
+    ```
+
+4. **Stop Services**
+
+    ```sh
+    docker compose down
     ```

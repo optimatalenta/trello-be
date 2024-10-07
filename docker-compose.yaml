@@ -8,16 +8,23 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - "5848:5848"
+      - "3000:3000"
     environment:
-      - APP_PORT=5848
       - NODE_ENV=development
       - DATABASE_URL=mysql://root@db:3306/trello_dbs
+      - COOKIES_TOKEN_AGE=3600000
+      - COOKIES_REFRESH_TOKEN_AGE=86400000
+      - JWT_SECREET_KEY="NCJKAHBFDQWG7TY812Y"
+      - JWT_EXPIRES_IN="1h"
+      - JWT_REFRESH_EXPIRES_IN="30d"
+      - JWT_REFRESH_SECREET_KEY="NCH879Y7y78ugyugs"
     depends_on:
       - db
   db:
     image: mariadb
     container_name: trello-db
+    ports:
+      - "3306:3306"
     environment:
       - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
       - MARIADB_DATABASE=trello_dbs
