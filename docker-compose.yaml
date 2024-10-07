@@ -1,0 +1,34 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trello-api
+    ports:
+      - "5848:5848"
+    environment:
+      - APP_PORT=5848
+      - NODE_ENV=development
+      - DATABASE_URL=mysql://root@db:3306/trello_dbs
+    depends_on:
+      - db
+    networks:
+      - trello-network
+  db:
+    image: mariadb
+    container_name: trello-db
+    environment:
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
+      - MARIADB_DATABASE=trello_dbs
+    networks:
+      - trello-network
+    volumes:
+      - db-data:/var/lib/mysql
+
+networks:
+  trello-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
